@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class SearchData {
+public class SearchResponse {
     private boolean result;
     private int count;
     private List<SearchItem> data;

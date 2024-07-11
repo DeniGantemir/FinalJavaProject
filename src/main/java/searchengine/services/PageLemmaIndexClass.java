@@ -1,11 +1,9 @@
 package searchengine.services;
 
-import lombok.AllArgsConstructor;
-
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.stereotype.Service;
 import searchengine.DTOClasses.IndexDTO;
 import searchengine.DTOClasses.LemmaDTO;
 import searchengine.DTOClasses.PageDTO;
@@ -16,19 +14,17 @@ import searchengine.model.SiteEntity;
 import searchengine.repository.IndexEntityRepository;
 import searchengine.repository.LemmaRepository;
 import searchengine.repository.PageRepository;
-import searchengine.repository.SiteRepository;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
 import java.util.TreeSet;
 import java.util.concurrent.ForkJoinPool;
 
 import static org.hibernate.tool.schema.SchemaToolingLogging.LOGGER;
 
+@Service
 @RequiredArgsConstructor
-public class InteractiveClass {
+public class PageLemmaIndexClass {
     private final PageRepository pageRepository;
     private final LemmaRepository lemmaRepository;
     private final IndexEntityRepository indexEntityRepository;
@@ -36,26 +32,7 @@ public class InteractiveClass {
     private final LemmaOperation lemmaOperation = new LemmaOperation();
     private final DTOTransferService dtoTransferService = new DTOTransferService();
 
-    private void deleteExistingPagesAndIndexes(SiteEntity siteEntity, String url) {
-        List<PageEntity> existingPageEntities = pageRepository.findAll().stream()
-                .filter(pe -> Objects.equals(pe.getPath(), url) || Objects.equals(pe.getSiteEntity(), siteEntity))
-                .toList();
-
-        for (PageEntity existingPageEntity : existingPageEntities) {
-            List<IndexEntity> indexEntities = indexEntityRepository.findAll().stream()
-                    .filter(ie -> ie.getPageEntity().equals(existingPageEntity))
-                    .toList();
-            indexEntities.forEach(indexEntityRepository::delete);
-            pageRepository.delete(existingPageEntity);
-        }
-        pageRepository.flush();
-
-        List<LemmaEntity> lemmaEntities = lemmaRepository.findAll().stream()
-                .filter(le -> le.getSiteEntity().equals(siteEntity))
-                .toList();
-        lemmaEntities.forEach(lemmaRepository::delete);
-    }
-    private void getPageLemmaIndexSiteMethod(SiteEntity siteEntity, String url) throws IOException {
+    public void getPageLemmaIndexSiteMethod(SiteEntity siteEntity, String url) throws IOException {
         String mainPageUrl = url.replaceAll("www.", "");
         ForkSiteParser parser = new ForkSiteParser(mainPageUrl);
         TreeSet<String> urlForkJoinParser = new TreeSet<>(forkJoinPool.invoke(parser));
@@ -75,8 +52,8 @@ public class InteractiveClass {
                 PageEntity pageEntity = dtoTransferService.mapToPageEntity(pageDTO, siteEntity);
                 pageRepository.save(pageEntity);
 
-                String text = lemmaOperation.removeHtmlTags(content);
-                HashMap<String, Integer> lemmaCounts = lemmaOperation.lemmaCounter(text);
+//                String text = lemmaOperation.removeHtmlTags(content);
+                HashMap<String, Integer> lemmaCounts = lemmaOperation.lemmaCounter(content);
 
                 lemmaCounts.forEach((lemma, frequency) -> {
                     LemmaDTO lemmaDTO = new LemmaDTO();

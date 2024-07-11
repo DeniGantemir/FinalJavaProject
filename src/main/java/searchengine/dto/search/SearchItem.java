@@ -1,14 +1,14 @@
 package searchengine.dto.search;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+@Data
 @Setter
 @Getter
 @AllArgsConstructor
-public class SearchResults {
+@NoArgsConstructor
+public class SearchItem {
     private String site;
     private String siteName;
     private String uri;

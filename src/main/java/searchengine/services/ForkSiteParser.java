@@ -1,4 +1,4 @@
-package searchengine;
+package searchengine.services;
 
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -38,17 +38,15 @@ public class ForkSiteParser extends RecursiveTask<Set<String>> {
                         linkFromAttr.contains(".pdf")) {
                     continue;
                 }
-
                 links.add(linkFromAttr);
                 ForkSiteParser task = new ForkSiteParser(linkFromAttr);
                 task.fork();
                 taskList.add(task);
-
             }
         } catch (HttpStatusException h) {
-            LOGGER.error("Error 404 fetching URL: ", link, h);
+            LOGGER.error("Ошибка 404 получения URL: ", link, h);
         } catch (Exception e) {
-            LOGGER.error("Error parsing link: ", link, e);
+            LOGGER.error("Ошибка парсинга ссылки: ", link, e);
         }
 
         for (ForkSiteParser task1 : taskList) {
@@ -56,38 +54,4 @@ public class ForkSiteParser extends RecursiveTask<Set<String>> {
         }
         return links;
     }
-
-//    @Override
-//    protected Set<String> compute() {
-//        Set<String> links = new TreeSet<>();
-//        HashSet<ForkSiteParser> taskList = new HashSet<>();
-//        try {
-//            Thread.sleep(150);
-//            Document doc = Jsoup.connect(link).userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64)").get();
-//            Elements element = doc.select("a");
-//            for (Element e : element) {
-//                String linkFromAttr = e.absUrl("href").replaceAll("/$", "");
-//                if (!linkFromAttr.contains(link) || !linkSet.add(linkFromAttr) ||
-//                        linkFromAttr.contains("#") || linkFromAttr.contains(".pdf") ||
-//                        linkFromAttr.contains(".png") || linkFromAttr.contains(".jpg") ||
-//                        linkFromAttr.contains(";") || linkFromAttr.contains(".com") ||
-//                        linkFromAttr.contains(".net")) {
-//                    continue;
-//                }
-//
-//                links.add(linkFromAttr);
-//                ForkSiteParser task = new ForkSiteParser(linkFromAttr);
-//                task.fork();
-//                taskList.add(task);
-//
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        for (ForkSiteParser task1 : taskList) {
-//            links.addAll(task1.join());
-//        }
-//        return links;
-//    }
 }
