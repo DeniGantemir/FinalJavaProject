@@ -20,23 +20,16 @@ public class RecursiveSiteIndexingService extends RecursiveTask<Void> {
     private final Site site;
     private final ForkJoinPool forkJoinPool = new ForkJoinPool();
     private final SiteRepository siteRepository;
-    private final PageRepository pageRepository;
-    private final LemmaRepository lemmaRepository;
-    private final IndexEntityRepository indexEntityRepository;
-    private final LemmaOperation lemmaOperation;
     private final DTOTransferService dtoTransferService = new DTOTransferService();
     private final PageLemmaIndexClass pageLemmaIndexClass;
 
 
-    public RecursiveSiteIndexingService(Site site, LemmaOperation lemmaOperation, SiteRepository siteRepository, PageRepository pageRepository,
-                                        LemmaRepository lemmaRepository, IndexEntityRepository indexEntityRepository, PageLemmaIndexClass pageLemmaIndexClass) {
+    public RecursiveSiteIndexingService(Site site,
+                                        SiteRepository siteRepository,
+                                        PageLemmaIndexClass pageLemmaIndexClass) {
         this.site = site;
-        this.lemmaOperation = lemmaOperation;
         this.pageLemmaIndexClass = pageLemmaIndexClass;
         this.siteRepository = siteRepository;
-        this.pageRepository = pageRepository;
-        this.lemmaRepository = lemmaRepository;
-        this.indexEntityRepository = indexEntityRepository;
     }
 
     @Override

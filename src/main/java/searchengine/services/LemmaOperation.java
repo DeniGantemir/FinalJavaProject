@@ -14,16 +14,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ForkJoinPool;
 
 public class LemmaOperation {
-    public static void main(String[] args) throws IOException {
-        LemmaOperation lemmaOperation = new LemmaOperation();
-        String url = "https://sendel.ru/posts/copy-file-between-git-branches";
-        Document doc = Jsoup.connect(url).get();
-        String content = doc.body().html();
-        HashMap<String, Integer> lemmaCounts = lemmaOperation.lemmaCounter(content);
-        lemmaCounts.forEach((lemma, frequency) -> {
-            System.out.println(lemma + " - " + frequency);
-        });
-    }
+
 public String splitTextIntoWords(String text) {
 
     StringBuilder myText = new StringBuilder();
@@ -70,33 +61,10 @@ public String splitTextIntoWords(String text) {
                     lemmaCounts.put(lemma, lemmaCounts.containsKey(lemma) ? lemmaCounts.get(lemma) + 1 : 1);
                 }
             }
-//            if (word.matches(word.replaceAll("[^A-Za-z]", ""))) {
-//                luceneMorph = new EnglishLuceneMorphology();
-//                wordForm = luceneMorph.getMorphInfo(word);
-//                boolean isValidRU = false;
-//                for (String baseForm : wordForm) {
-//                    String[] parts = baseForm.split("\\|");
-//                    String pos = parts[1];
-//                    if (!pos.matches("n СОЮЗ")
-//                            && !pos.matches("o МЕЖД")
-//                            && !pos.matches("l ПРЕДЛ")
-//                            && !pos.matches("p ЧАСТ")) {
-//                        isValidRU = true;
-//                        break;
-//                    }
-//                }
-//                if (isValidRU) {
-//                    wordbaseForm = luceneMorph.getNormalForms(word);
-//                    String lemma = wordbaseForm.get(0).split("\\|")[0];
-//                    lemmaCounts.put(lemma, lemmaCounts.getOrDefault(lemma, 0) + 1);
-//                }
-//            }
         }
         return lemmaCounts;
     }
     public String removeHtmlTags(String htmlContent) {
-//        String regex = "<.*?>";
-//        return htmlContent.replaceAll(regex, "");
         return Jsoup.parse(htmlContent).select("body").text();
     }
 }

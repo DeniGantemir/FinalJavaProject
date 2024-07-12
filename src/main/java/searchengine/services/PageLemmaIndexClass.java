@@ -17,6 +17,7 @@ import searchengine.repository.PageRepository;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.ForkJoinPool;
 
@@ -29,7 +30,6 @@ public class PageLemmaIndexClass {
     private final LemmaRepository lemmaRepository;
     private final IndexEntityRepository indexEntityRepository;
     private final ForkJoinPool forkJoinPool = new ForkJoinPool();
-    private final LemmaOperation lemmaOperation = new LemmaOperation();
     private final DTOTransferService dtoTransferService = new DTOTransferService();
 
     public void getPageLemmaIndexSiteMethod(SiteEntity siteEntity, String url) throws IOException {
@@ -37,23 +37,26 @@ public class PageLemmaIndexClass {
         ForkSiteParser parser = new ForkSiteParser(mainPageUrl);
         TreeSet<String> urlForkJoinParser = new TreeSet<>(forkJoinPool.invoke(parser));
 
+        LemmaFinder lemmaFinder = LemmaFinder.getInstance();
+
         for (String pageUrl : urlForkJoinParser) {
-            if (pageUrl.equals(siteEntity.getUrl())) {
-                continue;
-            }
+//            if (pageUrl.equals(siteEntity.getUrl())) {
+//                continue;
+//            }
             Document doc = Jsoup.connect(pageUrl).get();
-            String content = doc.body().html();
+            String content = doc.html();
             try {
                 PageDTO pageDTO = new PageDTO();
-                pageDTO.setPath(pageUrl.replaceAll(mainPageUrl, ""));
+//                pageDTO.setPath(pageUrl.replaceAll(mainPageUrl, ""));
+                pageDTO.setPath(normalizeUrl(pageUrl, mainPageUrl));
                 pageDTO.setCode(doc.connection().response().statusCode());
                 pageDTO.setContent(content);
                 pageDTO.setSiteEntityId(siteEntity.getId());
                 PageEntity pageEntity = dtoTransferService.mapToPageEntity(pageDTO, siteEntity);
                 pageRepository.save(pageEntity);
 
-//                String text = lemmaOperation.removeHtmlTags(content);
-                HashMap<String, Integer> lemmaCounts = lemmaOperation.lemmaCounter(content);
+//                String text = Jsoup.parse(content).select("body").text(); //////
+                Map<String, Integer> lemmaCounts = lemmaFinder.collectLemmas(content); ///////
 
                 lemmaCounts.forEach((lemma, frequency) -> {
                     LemmaDTO lemmaDTO = new LemmaDTO();
@@ -74,5 +77,50 @@ public class PageLemmaIndexClass {
                 LOGGER.info("Ошибка: " + e);
             }
         }
+//        String mainPageUrl = url.replaceAll("www.", "");
+//        ForkSiteParser parser = new ForkSiteParser(mainPageUrl);
+//        TreeSet<String> urlForkJoinParser = new TreeSet<>(forkJoinPool.invoke(parser));
+//
+//        for (String pageUrl : urlForkJoinParser) {
+//            if (pageUrl.equals(siteEntity.getUrl())) {
+//                continue;
+//            }
+//            Document doc = Jsoup.connect(pageUrl).get();
+//            String content = doc.body().html();
+//            try {
+//                PageDTO pageDTO = new PageDTO();
+//                pageDTO.setPath(pageUrl.replaceAll(mainPageUrl, ""));
+//                pageDTO.setCode(doc.connection().response().statusCode());
+//                pageDTO.setContent(content);
+//                pageDTO.setSiteEntityId(siteEntity.getId());
+//                PageEntity pageEntity = dtoTransferService.mapToPageEntity(pageDTO, siteEntity);
+//                pageRepository.save(pageEntity);
+//
+////                String text = lemmaOperation.removeHtmlTags(content);
+//                HashMap<String, Integer> lemmaCounts = lemmaOperation.lemmaCounter(content);
+//
+//                lemmaCounts.forEach((lemma, frequency) -> {
+//                    LemmaDTO lemmaDTO = new LemmaDTO();
+//                    lemmaDTO.setLemma(lemma);
+//                    lemmaDTO.setFrequency(frequency);
+//                    lemmaDTO.setSiteEntityId(siteEntity.getId());
+//                    LemmaEntity lemmaEntity = dtoTransferService.mapToLemmaEntity(lemmaDTO, siteEntity);
+//                    lemmaRepository.save(lemmaEntity);
+//
+//                    IndexDTO indexDTO = new IndexDTO();
+//                    indexDTO.setRank((float) frequency);
+//                    indexDTO.setLemmaEntityId(lemmaEntity.getId());
+//                    indexDTO.setPageEntityId(pageEntity.getId());
+//                    IndexEntity indexEntity = dtoTransferService.mapToIndexEntity(indexDTO, lemmaEntity, pageEntity);
+//                    indexEntityRepository.save(indexEntity);
+//                });
+//            } catch (Exception e) {
+//                LOGGER.info("Ошибка: " + e);
+//            }
+//        }
+    }
+    private String normalizeUrl(String url, String mainUrl) {
+        String relativeUrl = url.replaceAll(mainUrl, "");
+        return relativeUrl.isEmpty()? "/" : relativeUrl;
     }
 }

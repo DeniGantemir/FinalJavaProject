@@ -27,7 +27,6 @@ public class SiteIndexingService {
 
     private final ForkJoinPool forkJoinPool = new ForkJoinPool();
     private volatile boolean IsStopIndexing = false;
-    private final LemmaOperation lemmaOperation = new LemmaOperation();
     private final PageLemmaIndexClass pageLemmaIndexClass;
 
     public void startIndexing() {
@@ -46,9 +45,9 @@ public class SiteIndexingService {
             siteRepository.deleteAll();
         }
         for (Site site : sitesList.getSites()) {
-            forkJoinPool.submit(new RecursiveSiteIndexingService(site, lemmaOperation,
-                    siteRepository, pageRepository,
-                    lemmaRepository, indexEntityRepository, pageLemmaIndexClass));
+            forkJoinPool.submit(new RecursiveSiteIndexingService(site,
+                    siteRepository,
+                    pageLemmaIndexClass));
         }
     }
 

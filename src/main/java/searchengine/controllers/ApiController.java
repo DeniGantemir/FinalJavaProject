@@ -76,8 +76,8 @@ public class ApiController {
     @GetMapping("/search")
     public ResponseEntity<SearchResponse> search(@RequestParam("query") String query,
                                                  @RequestParam(value = "site", required = false) String site,
-                                                 @RequestParam(value = "offset", defaultValue = "0") int offset,
-                                                 @RequestParam(value = "limit", defaultValue = "2") int limit) throws IOException {
+                                                 @RequestParam(value = "offset", defaultValue = "0", required = false) int offset,
+                                                 @RequestParam(value = "limit", defaultValue = "2", required = false) int limit) throws IOException {
         if (query.isEmpty()) {
             return ResponseEntity.badRequest().body(new SearchResponse(false, 0, null));
         }
